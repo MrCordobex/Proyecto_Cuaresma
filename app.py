@@ -329,11 +329,11 @@ else:
                         
                         # Lógica de nombre o anónimo
                         if peticion.get('anonimo'):
-                            autor = "Un hermano en la fe"
+                            autor = "Anónimo"
                         else:
                             autor = f"{peticion['usuario']} ({peticion['grupo']})"
                         
-                        st.caption(f"📝 {autor}  |  📅 {peticion['fecha']}")
+                        st.caption(f"📝 {autor}")
 
                     with col_boton:
                         # Lógica del botón de rezar
