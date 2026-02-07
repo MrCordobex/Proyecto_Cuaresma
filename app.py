@@ -313,7 +313,7 @@ else:
                     col_texto, col_boton = st.columns([4, 1])
                     with col_texto:
                         st.markdown(f"### {peticion['texto']}")
-                        if peticion.get('anonimo'): autor = "Un hermano en la fe"
+                        if peticion.get('anonimo'): autor = "Anónimo"
                         else: autor = f"{peticion['usuario']} ({peticion['grupo']})"
                         st.caption(f"📝 {autor}  |  📅 {peticion['fecha']}")
                     with col_boton:
