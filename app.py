@@ -289,7 +289,7 @@ else:
     # 2. MURO DE PETICIONES
     elif menu == "🙏 Muro de Peticiones":
         st.title("🕊️ Muro de Oración")
-        st.write("Escribe tus intenciones para que la comunidad rece por ti.")
+        st.write("Escribe tus intenciones para que J1 rece por ti.")
 
         with st.expander("✍️ Escribir nueva petición", expanded=False):
             with st.form("form_peticion"):
