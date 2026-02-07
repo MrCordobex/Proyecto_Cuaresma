@@ -120,7 +120,7 @@ if not st.session_state['usuario']:
                         else:
                             st.error("Error en las contraseñas")
                 
-                # CASO 2: MODO RECUPERACIÓN (SI HA METIDO LA CLAVE MAESTRA ANTES)
+                # CASO 2: MODO RECUPERACIÓN
                 elif st.session_state['reset_mode']:
                     st.warning(f"🛠️ MODO RECUPERACIÓN para: {nombre_sel}")
                     st.write("Introduce tu nueva contraseña personal:")
@@ -135,7 +135,7 @@ if not st.session_state['usuario']:
                             time.sleep(1)
                             st.session_state['usuario'] = nombre_sel
                             st.session_state['grupo'] = grupo_sel
-                            st.session_state['reset_mode'] = False # Quitamos el modo reset
+                            st.session_state['reset_mode'] = False
                             st.rerun()
                         else:
                             st.error("Las contraseñas no coinciden.")
@@ -150,21 +150,15 @@ if not st.session_state['usuario']:
                     p_input = st.text_input("Contraseña", type="password")
                     
                     if st.button("Entrar"):
-                        # A) Contraseña Correcta
                         if p_input == pass_registrada:
                             st.session_state['usuario'] = nombre_sel
                             st.session_state['grupo'] = grupo_sel
                             st.rerun()
-                        
-                        # B) Contraseña Maestra (Activa modo reset)
                         elif p_input == MASTER_KEY:
                             st.session_state['reset_mode'] = True
                             st.rerun()
-                        
-                        # C) Contraseña Incorrecta
                         else:
                             st.error("Contraseña incorrecta")
-                            # Aquí mostramos el desplegable de ayuda
                             with st.expander("¿Se te ha olvidado la contraseña?"):
                                 st.write("Si quieres recuperar la contraseña, habla con tu catequista o con Pedro.")
                                 st.markdown("📞 **Pedro: 662 236 309**")
@@ -172,7 +166,6 @@ if not st.session_state['usuario']:
 
 # --- PANTALLA B: DENTRO DE LA APP (LOGUEADO) ---
 else:
-    # --- BARRA LATERAL (MENU) ---
     with st.sidebar:
         st.write(f"👤 **{st.session_state['usuario']}**")
         st.caption(f"🛡️ {st.session_state['grupo']}")
@@ -207,6 +200,27 @@ else:
                 ya_hecho = True
 
         if reto_actual is not None:
+            
+            # --- ⏳ BLOQUE DE CUENTA ATRÁS (NUEVO) ---
+            # Convertimos las fechas a formato fecha real para poder restar
+            df_retos['fecha_dt'] = pd.to_datetime(df_retos['fecha'])
+            hoy_dt = pd.to_datetime(datetime.now().strftime("%Y-%m-%d")) # Fecha de hoy limpia
+            
+            # Buscamos retos FUTUROS (Fecha mayor que hoy)
+            futuros = df_retos[df_retos['fecha_dt'] > hoy_dt].sort_values('fecha_dt')
+            
+            if not futuros.empty:
+                siguiente = futuros.iloc[0] # El primero de la lista
+                dias_restantes = (siguiente['fecha_dt'] - hoy_dt).days
+                
+                if dias_restantes == 1:
+                    st.warning(f"⏳ **¡Atención!** Solo queda **1 día** para el siguiente reto.")
+                else:
+                    st.info(f"⏳ Tienes **{dias_restantes} días** para completar este reto antes del siguiente.")
+            else:
+                st.success("🏁 ¡Estás en la recta final! No quedan más retos programados.")
+            # -----------------------------------------------
+
             st.caption(f"📅 Publicado: {reto_actual['fecha']}")
             st.title(reto_actual['titulo'])
             
