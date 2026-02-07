@@ -11,15 +11,19 @@ import certifi  # <--- IMPORTANTE: Nueva librería
 st.set_page_config(page_title="Cuaresma GO", page_icon="✝️", layout="centered")
 
 # ⚠️ TU CONTRASEÑA
-PASSWORD = "catequesiscuaresma2026"
+# --- PON ESTO NUEVO ---
+# Leemos los secretos de la nube
+USUARIO = st.secrets["mongo"]["user"]
+PASSWORD = st.secrets["mongo"]["password"]
+CLUSTER = st.secrets["mongo"]["cluster"]
 
-MONGO_URI = f"mongodb+srv://pedromarhuer03_db_user:{PASSWORD}@cluster0.ikalbov.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_URI = f"mongodb+srv://{USUARIO}:{PASSWORD}@{CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0"
 
 @st.cache_resource
 def init_connection():
-    # --- ARREGLO DEL ERROR SSL ---
-    # Usamos certifi.where() para decirle dónde están los certificados seguros
-    return MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+    # En la nube de Streamlit (Linux) no suele hacer falta certifi, 
+    # pero dejarlo no hace daño.
+    return MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True)
 
 try:
     client = init_connection()
