@@ -247,13 +247,13 @@ else:
                 st.divider(); st.subheader("🎯 Tu Misión")
                 with st.form("formulario_reto"):
                     clave_input = st.text_input("🔑 Clave del vídeo:")
-                    reflexion = st.text_area("✍️ Reflexión (+50 caracteres):")
+                    reflexion = st.text_area("✍️ Reflexión: ¿Has conseguido hacer el reto? ¿Qué has sentido?")
                     enviado = st.form_submit_button("🚀 ENVIAR RESPUESTA")
                     if enviado:
                         clave_ok = clave_input.upper().strip() == str(reto_actual['pass_video']).upper().strip()
-                        largo_ok = len(reflexion) > 50
+                        largo_ok = len(reflexion) > 150
                         if not clave_ok: st.error("❌ Clave incorrecta.")
-                        elif not largo_ok: st.warning("⚠️ Escribe un poco más.")
+                        elif not largo_ok: st.warning("⚠️ Escribe un poco más... Seguro que puedes!!!")
                         else:
                             guardar_progreso(st.session_state['usuario'], st.session_state['grupo'], reflexion, reto_actual['titulo'])
                             st.balloons(); st.success("¡Enviado!"); time.sleep(2); st.rerun()
