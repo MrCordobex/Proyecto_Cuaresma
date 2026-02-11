@@ -12,7 +12,7 @@ from bson.objectid import ObjectId
 st.set_page_config(page_title="Cuaresma GO", page_icon="✝️", layout="centered")
 
 # ⚠️ TU CONTRASEÑA MAESTRA
-MASTER_KEY = "MeQuieroConfirmarA+B=C"
+MASTER_KEY = st.secrets["auth"]["master_key"]
 
 # Leemos los secretos de la nube
 try:
