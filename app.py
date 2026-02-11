@@ -84,6 +84,32 @@ def toggle_oracion(id_peticion, usuario_actual):
         else:
             db.peticiones.update_one({'_id': ObjectId(id_peticion)}, {'$push': {'orantes': usuario_actual}})
 
+def validacion_avanzada(texto):
+    texto = texto.lower().strip()
+    palabras = texto.split()
+    
+    # 1. ¿Usan conectores lógicos del español? (Stopwords)
+    # Si un texto de 150 caracteres no tiene estas palabras, es muy sospechoso.
+    conectores = {"que", "el", "la", "de", "en", "y", "a", "los", "se", "no", "por", "con", "un", "una", "mi", "yo", "he", "sentido", "reto"}
+    conectores_usados = [p for p in palabras if p in conectores]
+    if len(conectores_usados) < 5:
+        return False, "⚠️ Tu reflexión parece un poco confusa... ¡Intenta usar frases completas!"
+
+    # 2. Detección de "Copy-Paste" (Repetición de frases)
+    # Miramos si hay bloques de 3 palabras que se repiten mucho
+    if len(palabras) > 10:
+        bloques = [" ".join(palabras[i:i+3]) for i in range(len(palabras)-2)]
+        if len(set(bloques)) / len(bloques) < 0.6: # Si más del 40% son bloques repetidos
+            return False, "⚠️ Veo mucha repetición... ¡Cuéntame algo más original!"
+
+    # 3. Diversidad léxica (Evita: "el reto bien bien bien bien bien...")
+    if len(palabras) > 0:
+        proporcion_unica = len(set(palabras)) / len(palabras)
+        if proporcion_unica < 0.5:
+            return False, "⚠️ Estás repitiendo mucho las mismas palabras. ¡Exprésate un poco más!"
+
+    return True, ""
+
 # ==========================================
 # 3. LÓGICA DE LA INTERFAZ (FRONTEND)
 # ==========================================
@@ -251,12 +277,23 @@ else:
                     enviado = st.form_submit_button("🚀 ENVIAR RESPUESTA")
                     if enviado:
                         clave_ok = clave_input.upper().strip() == str(reto_actual['pass_video']).upper().strip()
-                        largo_ok = len(reflexion) > 150
-                        if not clave_ok: st.error("❌ Clave incorrecta.")
-                        elif not largo_ok: st.warning("⚠️ Escribe un poco más... Seguro que puedes!!!")
+    
+                        # Primero longitud básica
+                        if not clave_ok:
+                            st.error("❌ Clave incorrecta.")
+                        elif len(reflexion) < 150:
+                            st.warning("⚠️ ¡Es demasiado corto! Cuéntanos un poco más sobre tu experiencia.")
                         else:
-                            guardar_progreso(st.session_state['usuario'], st.session_state['grupo'], reflexion, reto_actual['titulo'])
-                            st.balloons(); st.success("¡Enviado!"); time.sleep(2); st.rerun()
+                            # Si la longitud es ok, pasamos el "test de calidad"
+                            es_real, motivo = validacion_avanzada(reflexion)
+                            if not es_real:
+                                st.warning(motivo)
+                            else:
+                                guardar_progreso(st.session_state['usuario'], st.session_state['grupo'], reflexion, reto_actual['titulo'])
+                                st.balloons()
+                                st.success("¡Reto superado con éxito! 🚀")
+                                time.sleep(2)
+                                st.rerun()
             else:
                 st.success("✅ ¡Reto completado!")
         else:
